@@ -25,6 +25,10 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
+    - name: list
+      run: ls -lah
+      shell: bash
+
     - name: Run Docker build script
       run: ./build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_NAME" "$DOCKERFILE"
       shell: bash
