@@ -30,5 +30,5 @@ runs:
       shell: bash
 
     - name: Run Docker build script
-      run: ./build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_NAME" "$DOCKERFILE"
+      run: ./build-docker-image/build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_NAME" "$DOCKERFILE"
       shell: bash
