@@ -30,6 +30,7 @@ echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"pass
 docker run --rm -v $(pwd):/workspace -v $(pwd)/kaniko/.cache:/cache -v $(pwd)/kaniko/.docker:/kaniko/.docker \
   gcr.io/kaniko-project/executor:latest \
   --context . \
+  --build-arg GITHUB_PAT="$GITHUB_PAT" \
   --dockerfile "$DOCKERFILE" \
   --destination "$DOCKER_TAG" \
   --destination "$DOCKER_TAG_WITH_DATE" \
