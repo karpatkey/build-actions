@@ -28,3 +28,4 @@ runs:
       run: |
         chmod +x ./scripts/build_and_push.sh
         ./scripts/build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_NAME" "$DOCKERFILE"
+      shell: bash
