@@ -23,8 +23,8 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Run Docker build script
-      run: ./build-docker-image/build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_NAME" "$DOCKERFILE"
+      run: ${{ github.action_path }}/build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" "$DOCKER_IMAGE_NAME" "$DOCKERFILE"
       shell: bash
