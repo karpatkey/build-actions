@@ -26,5 +26,5 @@ runs:
       uses: actions/checkout@v4
 
     - name: Run Docker build script
-      run: ${{ github.action_path }}/build_and_push.sh "$GIT_REF" "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$DOCKER_PASSWORD"
+      run: ${{ github.action_path }}/build_and_push.sh
       shell: bash
