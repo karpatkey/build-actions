@@ -19,6 +19,11 @@ inputs:
   DOCKERFILE:
     description: 'Path to the Dockerfile'
     required: true
+  PR_SHA:
+    description: 'PR SHA'
+    required: true
+    default: 'null'
+
 runs:
   using: 'composite'
   steps:
@@ -26,5 +31,5 @@ runs:
       uses: actions/checkout@v4
 
     - name: Run Docker build script
-      run: ${{ github.action_path }}/build_and_push.sh
+      run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
       shell: bash
