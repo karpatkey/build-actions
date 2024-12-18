@@ -1,4 +1,4 @@
-la -lah
+ls -lah
 
 # #!/bin/bash
 # set -xe
