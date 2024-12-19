@@ -26,12 +26,12 @@ if [ -n "$GIT_TAG" ]; then
   DOCKER_TAG_WITH_GIT_TAG="${DOCKER_IMAGE_NAME}:${GIT_TAG}"
 fi
 
-mkdir -p kaniko/.docker
-mkdir -p kaniko/.cache
+# mkdir -p kaniko/.docker
+# mkdir -p kaniko/.cache
 
-echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > kaniko/.docker/config.json
+echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > .docker/config.json
 
-docker run --rm -v $(pwd):/workspace -v $(pwd)/kaniko/.cache:/cache -v $(pwd)/kaniko/.docker:/kaniko/.docker \
+docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/kaniko/.docker \
   gcr.io/kaniko-project/executor:debug \
   --context . \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
