@@ -26,7 +26,7 @@ if [ -n "$GIT_TAG" ]; then
   DOCKER_TAG_WITH_GIT_TAG="${DOCKER_IMAGE_NAME}:${GIT_TAG}"
 fi
 
-# mkdir -p kaniko/.docker
+mkdir -p .docker
 # mkdir -p kaniko/.cache
 
 echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > .docker/config.json
