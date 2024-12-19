@@ -6,7 +6,7 @@ set -xe
 # DOCKER_USERNAME="your_docker_username"
 # DOCKER_PASSWORD="your_docker_password"
 
-git checkout $GIT_REF
+# git checkout $GIT_REF
 
 # BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD | sed 's/[^a-zA-Z0-9]/-/g')  # should be the same as GIT_REF
 BRANCH_NAME=$(echo "$GIT_REF" | sed 's/[^a-zA-Z0-9]/-/g')
