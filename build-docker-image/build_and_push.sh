@@ -27,6 +27,8 @@ if [ -n "$GIT_TAG" ]; then
 fi
 
 mkdir -p kaniko/.docker
+mkdir -p kaniko/.cache
+
 echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > kaniko/.docker/config.json
 
 docker run --rm -v $(pwd):/workspace -v $(pwd)/kaniko/.cache:/cache -v $(pwd)/kaniko/.docker:/kaniko/.docker \
@@ -44,6 +46,7 @@ docker run --rm -v $(pwd):/workspace -v $(pwd)/kaniko/.cache:/cache -v $(pwd)/ka
   --single-snapshot \
   --compressed-caching=false \
   --snapshot-mode=redo \
+  --cleanup \
   --cache-repo="$DOCKER_IMAGE_NAME"
 
 echo "Image pushed to registry: $DOCKER_TAG"
