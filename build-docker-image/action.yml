@@ -32,5 +32,4 @@ runs:
 
     - name: Run Docker build script
       run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
-      # run: cd $GITHUB_WORKSPACE && ${{ github.action_path }}/build_and_push.sh $PR_SHA
       shell: bash
