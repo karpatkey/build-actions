@@ -44,7 +44,6 @@ docker run --rm -v $(pwd):/workspace -v $(pwd)/kaniko/.cache:/cache -v $(pwd)/ka
   --single-snapshot \
   --compressed-caching=false \
   --snapshot-mode=redo \
-  --use-new-run \
   --cache-repo="$DOCKER_IMAGE_NAME"
 
 echo "Image pushed to registry: $DOCKER_TAG"
