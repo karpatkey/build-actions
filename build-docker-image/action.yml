@@ -30,6 +30,9 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # - name: Run Docker build script
+    #   run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
+    #   shell: bash
     - name: Run Docker build script
-      run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
+      run: ./build_and_push.sh $PR_SHA
       shell: bash
