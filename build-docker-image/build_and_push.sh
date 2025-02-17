@@ -34,7 +34,8 @@ docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/
   gcr.io/kaniko-project/executor:v1.23.2-slim \
   --context . \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
-  --dockerfile "$DOCKERFILE" \
+  --dockerfile /workspace/"$DOCKERFILE" \
+  # --dockerfile "$DOCKERFILE" \
   --destination "$DOCKER_TAG" \
   --destination "$DOCKER_TAG_WITH_DATE" \
   --destination "$DOCKER_TAG_WITH_PR_SHA" \
