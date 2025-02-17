@@ -30,7 +30,9 @@ mkdir -p .docker
 
 echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" > .docker/config.json
 
-docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/kaniko/.docker \
+# docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/kaniko/.docker \
+
+docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker/config.json:/kaniko/.docker/config.json:ro \
   gcr.io/kaniko-project/executor:v1.23.2-slim \
   --context . \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
