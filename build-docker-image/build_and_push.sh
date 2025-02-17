@@ -33,7 +33,7 @@ echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"pass
 # docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/kaniko/.docker \
 
 docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker/config.json:/kaniko/.docker/config.json:ro \
-  gcr.io/kaniko-project/executor:v1.23.2-slim \
+  gcr.io/kaniko-project/executor:v1.23.2 \
   --context . \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
   --dockerfile /workspace/"$DOCKERFILE" \
