@@ -35,7 +35,6 @@ docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/
   --context . \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
   --dockerfile /workspace/"$DOCKERFILE" \
-  # --dockerfile "$DOCKERFILE" \
   --destination "$DOCKER_TAG" \
   --destination "$DOCKER_TAG_WITH_DATE" \
   --destination "$DOCKER_TAG_WITH_PR_SHA" \
@@ -49,6 +48,7 @@ docker run --rm -v $(pwd):/workspace -v $(pwd)/.cache:/cache -v $(pwd)/.docker:/
   --cleanup \
   --cache-repo="$DOCKER_IMAGE_NAME"
 
+# # --dockerfile "$DOCKERFILE" \
 
 echo "Image pushed to registry: $DOCKER_TAG"
 
