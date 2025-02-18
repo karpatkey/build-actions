@@ -23,7 +23,7 @@ trap cleanup EXIT
 set +x  # Disable command tracing
 
 REF="${{ inputs.ref }}"
-REF="${REF:-$GITREF}"
+REF="${REF:-$GIT_REF}"
 
 REGISTRY="${{ inputs.registry }}"
 REGISTRY="${REGISTRY:-${DOCKER_REGISTRY:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey}}"
