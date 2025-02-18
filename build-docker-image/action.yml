@@ -20,6 +20,11 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        version: ">= 510.0.0"
+
     - name: Set Environment Variables
       shell: bash
       run: |
@@ -41,6 +46,7 @@ runs:
         FULL_IMAGE_NAME="${DOCKER_IMAGE_NAME-$DEFAULT_IMAGE}"
 
         # Export for later steps
+        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
         echo "REF=$REF" >> $GITHUB_ENV
         echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
         echo "IMAGE=$IMAGE" >> $GITHUB_ENV
