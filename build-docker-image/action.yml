@@ -37,8 +37,8 @@ runs:
 
         DOCKERFILE="${{ inputs.dockerfile }}"
         DOCKERFILE="${DOCKERFILE:-${DOCKER_DOCKERFILE:-./Dockerfile}}"
-
-        FULL_IMAGE_NAME="$REGISTRY/$IMAGE"
+        DEFAULT_IMAGE=$REGISTRY/$IMAGE
+        FULL_IMAGE_NAME="${DOCKER_IMAGE_NAME-$DEFAULT_IMAGE}"
 
         # Export for later steps
         echo "REF=$REF" >> $GITHUB_ENV
