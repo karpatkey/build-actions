@@ -1,21 +1,21 @@
-name: "Build Docker Image"
-description: "Build Docker image using Kaniko"
+name: Build Docker Image
+description: Build Docker image using Kaniko
 inputs:
   ref:
-    description: "Ref. Git reference (branch, tag, or commit)"
+    description: Ref. Git reference (branch, tag, or commit)
     required: true
   registry:
-    description: "Docker registry URL"
+    description: Docker registry URL
     required: true
   image:
-    description: "Docker image name"
+    description: Docker image name
     required: true
   dockerfile:
-    description: "Path to the Dockerfile"
+    description: Path to the Dockerfile
     required: true
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Checkout repository
       uses: actions/checkout@v4
