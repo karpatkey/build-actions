@@ -29,6 +29,7 @@ gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS
 gcloud auth configure-docker "$DOCKER_REGISTRY" --quiet
 
 
+set +x  # Disable command tracing
 # Get a fresh access token using your service account credentials.
 ACCESS_TOKEN=$(gcloud auth print-access-token)
 
@@ -44,6 +45,8 @@ cat > $HOME/.docker/config.json <<EOF
   }
 }
 EOF
+
+set -x  # Re-enable command tracing if needed
 
 # Continue with your existing variables and tag calculations.
 BRANCH_NAME=$(echo "$GIT_REF" | sed 's/[^a-zA-Z0-9]/-/g')
