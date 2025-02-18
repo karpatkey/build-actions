@@ -26,7 +26,7 @@ runs:
         version: ">= 510.0.0"
 
     - name: Use gcloud info
-      run: gcloud info
+      run: "gcloud info"
 
     - name: Set Environment Variables
       shell: bash
