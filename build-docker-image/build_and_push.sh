@@ -11,6 +11,14 @@ if ! command -v gcloud &> /dev/null; then
   sudo apt-get update && sudo apt-get install -y google-cloud-sdk
 fi
 
+cleanup() {
+  echo "Cleaning up credentials..."
+  rm -f "$HOME/gcloud.json"
+  rm -f "$HOME/.docker/config.json"
+}
+# Ensure cleanup is run on script exit, whether successful or error
+trap cleanup EXIT
+
 
 set +x  # Disable command tracing
 
