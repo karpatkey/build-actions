@@ -14,6 +14,9 @@ inputs:
     description: Path to the Dockerfile
     required: true
 
+env:
+  REG_PASSWORD: ${{ secrets.GCP_REG_PASSWORD }}
+
 runs:
   using: composite
   steps:
@@ -28,7 +31,7 @@ runs:
     - name: Set Environment Variables
       shell: bash
       run: |
-        DOCKER_PASSWORD="${DOCKER_PASSWORD:-$PASSWORD}"
+        DOCKER_PASSWORD="${DOCKER_PASSWORD:-$REG_PASSWORD}"
         # Extract repository name (karpatkey/my-repo -> my-repo)
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
 
@@ -55,7 +58,6 @@ runs:
         echo "DOCKERFILE=$DOCKERFILE" >> $GITHUB_ENV
         echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
       env:
-        PASSWORD: ${{ secrets.GCP_REG_PASSWORD }}
         GITREF: ${{ github.head_ref || github.ref_name }}
         GITHUB_REPOSITORY: ${{ github.repository }}
 
