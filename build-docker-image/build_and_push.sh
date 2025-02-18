@@ -32,7 +32,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
 # Activate the service account using the JSON key.
 gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
 
-# export DOCKER_REGISTRY="europe-docker.pkg.dev"
+export DOCKER_REGISTRY="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey"
 
 # Configure Docker to use gcloud as a credential helper for your registry.
 # Make sure that DOCKER_REGISTRY is set to your Artifact Registry domain (e.g. "europe-docker.pkg.dev").
