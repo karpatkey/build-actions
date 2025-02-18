@@ -22,11 +22,28 @@ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
 # Activate the service account using the JSON key.
 gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
 
-export DOCKER_REGISTRY="europe-docker.pkg.dev"
+# export DOCKER_REGISTRY="europe-docker.pkg.dev"
 
 # Configure Docker to use gcloud as a credential helper for your registry.
 # Make sure that DOCKER_REGISTRY is set to your Artifact Registry domain (e.g. "europe-docker.pkg.dev").
 gcloud auth configure-docker "$DOCKER_REGISTRY" --quiet
+
+
+# Get a fresh access token using your service account credentials.
+ACCESS_TOKEN=$(gcloud auth print-access-token)
+
+# Create a Docker config that includes the token directly.
+mkdir -p $HOME/.docker
+cat > $HOME/.docker/config.json <<EOF
+{
+  "auths": {
+    "$DOCKER_REGISTRY": {
+      "username": "oauth2accesstoken",
+      "password": "$ACCESS_TOKEN"
+    }
+  }
+}
+EOF
 
 # Continue with your existing variables and tag calculations.
 BRANCH_NAME=$(echo "$GIT_REF" | sed 's/[^a-zA-Z0-9]/-/g')
