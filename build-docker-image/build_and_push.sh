@@ -22,27 +22,6 @@ trap cleanup EXIT
 
 set +x  # Disable command tracing
 
-REF="${{ inputs.ref }}"
-REF="${REF:-$GIT_REF}"
-
-REGISTRY="${{ inputs.registry }}"
-REGISTRY="${REGISTRY:-${DOCKER_REGISTRY:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey}}"
-
-IMAGE="${{ inputs.image }}"
-IMAGE="${IMAGE:-${DOCKER_IMAGE:-${REPO_NAME}}}"
-
-DOCKERFILE="${{ inputs.dockerfile }}"
-DOCKERFILE="${DOCKERFILE:-${DOCKER_DOCKERFILE:-./Dockerfile}}"
-
-FULL_IMAGE_NAME="$REGISTRY/$IMAGE"
-
-# Export for later steps
-echo "REF=$REF" >> $GITHUB_ENV
-echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
-echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-echo "DOCKERFILE=$DOCKERFILE" >> $GITHUB_ENV
-echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
-
 # Expect that your service account JSON is stored in a CI secret.
 # Write the service account JSON content (from a secret, for example) to a file.
 echo "$DOCKER_PASSWORD" > "$HOME/gcloud.json"

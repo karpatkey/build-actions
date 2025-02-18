@@ -20,6 +20,36 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set Environment Variables
+      shell: bash
+      run: |
+        # Extract repository name (karpatkey/my-repo -> my-repo)
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+
+        REF="${{ inputs.ref }}"
+        REF="${REF:-$GITREF}"
+
+        REGISTRY="${{ inputs.registry }}"
+        REGISTRY="${REGISTRY:-${DOCKER_REGISTRY:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey}}"
+
+        IMAGE="${{ inputs.image }}"
+        IMAGE="${IMAGE:-${DOCKER_IMAGE:-${REPO_NAME}}}"
+
+        DOCKERFILE="${{ inputs.dockerfile }}"
+        DOCKERFILE="${DOCKERFILE:-${DOCKER_DOCKERFILE:-./Dockerfile}}"
+
+        FULL_IMAGE_NAME="$REGISTRY/$IMAGE"
+
+        # Export for later steps
+        echo "REF=$REF" >> $GITHUB_ENV
+        echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
+        echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+        echo "DOCKERFILE=$DOCKERFILE" >> $GITHUB_ENV
+        echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
+      env:
+        GITREF: ${{ github.ref }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+
     - name: Run Docker build script
       run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
       shell: bash
