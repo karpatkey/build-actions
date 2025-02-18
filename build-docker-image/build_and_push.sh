@@ -12,6 +12,8 @@ if ! command -v gcloud &> /dev/null; then
 fi
 
 
+set +x  # Disable command tracing
+
 # Expect that your service account JSON is stored in a CI secret.
 # Write the service account JSON content (from a secret, for example) to a file.
 echo "$GCP_SA_JSON" > "$HOME/gcloud.json"
@@ -29,7 +31,6 @@ gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS
 gcloud auth configure-docker "$DOCKER_REGISTRY" --quiet
 
 
-set +x  # Disable command tracing
 # Get a fresh access token using your service account credentials.
 ACCESS_TOKEN=$(gcloud auth print-access-token)
 
