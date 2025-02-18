@@ -1,6 +1,17 @@
 #!/bin/bash
 set -xe
 
+
+# Install gcloud CLI if not available (for Ubuntu-based systems)
+if ! command -v gcloud &> /dev/null; then
+  echo "gcloud not found, installing..."
+  sudo apt-get update && sudo apt-get install -y curl apt-transport-https gnupg
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+  sudo apt-get update && sudo apt-get install -y google-cloud-sdk
+fi
+
+
 # Expect that your service account JSON is stored in a CI secret.
 # Write the service account JSON content (from a secret, for example) to a file.
 echo "$GCP_SA_JSON" > "$HOME/gcloud.json"
