@@ -16,7 +16,7 @@ set +x  # Disable command tracing
 
 # Expect that your service account JSON is stored in a CI secret.
 # Write the service account JSON content (from a secret, for example) to a file.
-echo "$GCP_SA_JSON" > "$HOME/gcloud.json"
+echo "$GCP_REG_PASSWORD" > "$HOME/gcloud.json"
 
 # Set the environment variable so that gcloud and client libraries pick it up.
 export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
