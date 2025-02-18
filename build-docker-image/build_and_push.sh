@@ -48,7 +48,7 @@ echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
 echo "$DOCKER_PASSWORD" > "$HOME/gcloud.json"
 
 # Set the environment variable so that gcloud and client libraries pick it up.
- GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
+GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
 
 # Activate the service account using the JSON key.
 gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
