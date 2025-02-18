@@ -22,7 +22,9 @@ trap cleanup EXIT
 
 set +x  # Disable command tracing
 
-REF="${{ inputs.ref }}"
+# REF="${{ inputs.ref }}"
+REF="$INPUT_REF"
+
 REF="${REF:-$GIT_REF}"
 
 REGISTRY="${{ inputs.registry }}"
