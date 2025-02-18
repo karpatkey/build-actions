@@ -19,6 +19,11 @@ runs:
   steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    
+    - name: Set up gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        version: 'latest' # Specify the version you need
 
     - name: Set Environment Variables
       shell: bash
