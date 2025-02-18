@@ -27,16 +27,14 @@ set +x  # Disable command tracing
 echo "$DOCKER_PASSWORD" > "$HOME/gcloud.json"
 
 # Set the environment variable so that gcloud and client libraries pick it up.
-export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
+GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
 
 # Activate the service account using the JSON key.
 gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
 
-# export DOCKER_REGISTRY="europe-docker.pkg.dev"
-
 # Configure Docker to use gcloud as a credential helper for your registry.
 # Make sure that DOCKER_REGISTRY is set to your Artifact Registry domain (e.g. "europe-docker.pkg.dev").
-gcloud auth configure-docker "$DOCKER_REGISTRY" --quiet
+gcloud auth configure-docker "$REGISTRY" --quiet
 
 
 # Get a fresh access token using your service account credentials.
@@ -47,7 +45,7 @@ mkdir -p $HOME/.docker
 cat > $HOME/.docker/config.json <<EOF
 {
   "auths": {
-    "$DOCKER_REGISTRY": {
+    "$REGISTRY": {
       "username": "oauth2accesstoken",
       "password": "$ACCESS_TOKEN"
     }
@@ -55,20 +53,22 @@ cat > $HOME/.docker/config.json <<EOF
 }
 EOF
 
+
+
 set -x  # Re-enable command tracing if needed
 
 # Continue with your existing variables and tag calculations.
-BRANCH_NAME=$(echo "$GIT_REF" | sed 's/[^a-zA-Z0-9]/-/g')
+BRANCH_NAME=$(echo "$REF" | sed 's/[^a-zA-Z0-9]/-/g')
 CURRENT_DATE=$(date -u +"%Y%m%d")
 CURRENT_TIME=$(date -u +"%H%M%S")
 PR_SHA=$(echo "$1" | cut -c1-7)
 GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
-DOCKER_TAG="${DOCKER_IMAGE_NAME}:${BRANCH_NAME}"
-DOCKER_TAG_WITH_DATE="${DOCKER_IMAGE_NAME}:${BRANCH_NAME}-${CURRENT_DATE}-${CURRENT_TIME}"
-DOCKER_TAG_WITH_PR_SHA="${DOCKER_IMAGE_NAME}:pr${PR_SHA}"
+DOCKER_TAG="${FULL_IMAGE_NAME}:${BRANCH_NAME}"
+DOCKER_TAG_WITH_DATE="${FULL_IMAGE_NAME}:${BRANCH_NAME}-${CURRENT_DATE}-${CURRENT_TIME}"
+DOCKER_TAG_WITH_PR_SHA="${FULL_IMAGE_NAME}:pr${PR_SHA}"
 
 if [ -n "$GIT_TAG" ]; then
-  DOCKER_TAG_WITH_GIT_TAG="${DOCKER_IMAGE_NAME}:${GIT_TAG}"
+  DOCKER_TAG_WITH_GIT_TAG="${FULL_IMAGE_NAME}:${GIT_TAG}"
 fi
 
 # Optionally, ensure a cache directory exists
@@ -94,7 +94,7 @@ docker run --rm \
   --snapshot-mode=redo \
   --compressed-caching=false \
   --cleanup \
-  --cache-repo="$DOCKER_IMAGE_NAME"
+  --cache-repo="$FULL_IMAGE_NAME"
 
 echo "Image pushed to registry: $DOCKER_TAG"
 if [ -n "$GIT_TAG" ]; then
