@@ -48,6 +48,8 @@ runs:
       run: |
         REPO_NAME=$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')
         echo "repo_name=$REPO_NAME" >> $GITHUB_ENV
+        echo $REPO_NAME
+        echo $repo_name
         echo "REF=$REF" >> $GITHUB_ENV
       env:
         GITREF: ${{ github.head_ref || github.ref_name }}
