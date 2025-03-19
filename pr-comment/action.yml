@@ -1,0 +1,38 @@
+name: "PR Comment"
+description: "Post a comment on a PR with the deployment URL, built using the repository name and PR number."
+inputs:
+  pr_number:
+    description: "The pull request number to comment on"
+    required: true
+  github_token:
+    description: "GitHub token with repo permissions (use secrets.GITHUB_TOKEN)"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Extract Repository Name
+      id: repo-name
+      shell: bash
+      run: |
+        # Extract the repository name from GITHUB_REPOSITORY (owner/repo)
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
+
+    - name: Set Deployment URL
+      id: set_url
+      shell: bash
+      run: |
+        PR_NUMBER="${{ inputs.pr_number }}"
+        # Build the deployment URL using PR number and repository name
+        DEPLOYMENT_URL="https://${PR_NUMBER}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev"
+        echo "deployment_url=${DEPLOYMENT_URL}" >> $GITHUB_OUTPUT
+
+    - name: Comment on PR
+      shell: bash
+      run: |
+        COMMENT_BODY="Deployment URL: ${{ steps.set_url.outputs.deployment_url }}"
+        curl -X POST \
+          -H "Authorization: Bearer ${{ inputs.github_token }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ inputs.pr_number }}/comments" \
+          -d "{\"body\":\"${COMMENT_BODY}\"}"

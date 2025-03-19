@@ -1,0 +1,58 @@
+name: "PR Cleanup Deployment"
+description: "Authenticate with GCP, get GKE credentials, install kubectl, and delete PR deployment resources."
+inputs:
+  credentials_json:
+    description: "GCP service account credentials JSON"
+    required: true
+  cluster_name:
+    description: "Name of the GKE cluster"
+    required: true
+  region:
+    description: "Region (or location) of the GKE cluster"
+    required: true
+  pr_number:
+    description: "The pull request number to clean up"
+    required: true
+  namespace:
+    description: "Kubernetes namespace where the resources are deployed"
+    required: false
+    default: "kpk-portal-pr-review"
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to GCP
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ inputs.credentials_json }}
+
+    - name: Get GKE credentials
+      id: get-credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ inputs.cluster_name }}
+        location: ${{ inputs.region }}
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+      shell: bash
+
+    - name: Extract Repository Name
+      id: repo-name
+      run: |
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Delete Kubernetes Resources
+      run: |
+        kubectl delete deployment -n ${{ inputs.namespace }} ${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}
+        kubectl delete svc -n ${{ inputs.namespace }} ${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}
+        kubectl delete ing -n ${{ inputs.namespace }} ${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}
+      shell: bash
