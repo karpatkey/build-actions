@@ -7,12 +7,16 @@ inputs:
   github_token:
     description: "GitHub token with repo permissions (use secrets.GITHUB_TOKEN)"
     required: true
-env:
-  GITREF: ${{ github.head_ref || github.ref_name }}
-  GITHUB_REPOSITORY: ${{ github.repository }}
 runs:
   using: "composite"
   steps:
+    - name: Extract Repository Name
+      id: repo-name
+      shell: bash
+      run: |
+        # Extract the repository name from GITHUB_REPOSITORY (owner/repo)
+        REPO_NAME="${{ github.repository }}"
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
 
     - name: Set Deployment URL
       id: set_url

@@ -17,11 +17,6 @@ inputs:
     description: "Kubernetes namespace where the resources are deployed"
     required: false
     default: "kpk-portal-pr-review"
-
-env:
-  GITREF: ${{ github.head_ref || github.ref_name }}
-  GITHUB_REPOSITORY: ${{ github.repository }}
-
 runs:
   using: "composite"
   steps:
@@ -46,6 +41,13 @@ runs:
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
+      shell: bash
+
+    - name: Extract Repository Name
+      id: repo-name
+      run: |
+        REPO_NAME="${{ github.repository }}"
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Delete Kubernetes Resources
