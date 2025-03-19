@@ -46,12 +46,8 @@ runs:
     - name: Extract Repository Name
       id: repo-name
       run: |
-        REPO_NAME="${GITHUB_REPOSITORY##*/}"
-
-        REF="${{ inputs.ref }}"
-        REF="${REF:-$GITREF}"
-
-        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+        REPO_NAME=$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')
+        echo "repo_name=$REPO_NAME" >> $GITHUB_ENV
         echo "REF=$REF" >> $GITHUB_ENV
       env:
         GITREF: ${{ github.head_ref || github.ref_name }}
