@@ -19,6 +19,9 @@ inputs:
   templates_folder:
     description: "Path (from the root of the caller repo) where the deployment templates reside"
     required: true
+env:
+  GITREF: ${{ github.head_ref || github.ref_name }}
+  GITHUB_REPOSITORY: ${{ github.repository }}
 runs:
   using: "composite"
   steps:
@@ -40,14 +43,6 @@ runs:
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
-      shell: bash
-
-    - name: Extract Repository Name
-      id: repo-name
-      run: |
-        # Extract repository name from GITHUB_REPOSITORY (e.g., karpatkey/my-repo -> my-repo)
-        REPO_NAME="${GITHUB_REPOSITORY##*/}"
-        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Set Docker tag
