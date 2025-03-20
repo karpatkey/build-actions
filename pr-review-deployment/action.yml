@@ -81,3 +81,8 @@ runs:
       run: |
         kubectl apply -f deployment-temp.yaml
       shell: bash
+
+    - name: Clean up
+        run: |
+          rm deployment-temp.yaml
+          rm ingress-temp.yaml
