@@ -83,6 +83,8 @@ runs:
         sed "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev|g" ingress-temp.yaml
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" ingress-temp.yaml
         sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" ingress-temp.yaml
+        cat ingress-temp.yaml
+      shell: bash
 
     - name: Deploy to Kubernetes
       run: |
