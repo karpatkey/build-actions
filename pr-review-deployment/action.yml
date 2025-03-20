@@ -19,7 +19,6 @@ inputs:
   templates_folder:
     description: "Path (from the root of the caller repo) where the deployment templates reside"
     required: true
-
 runs:
   using: "composite"
   steps:
@@ -43,17 +42,12 @@ runs:
         sudo mv ./kubectl /usr/local/bin/kubectl
       shell: bash
 
-    - name: Extract Repository Name
+    - name: Extract Repository Name (lowercase)
       id: repo-name
       run: |
         REPO_NAME=$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')
-        echo "repo_name=$REPO_NAME" >> $GITHUB_ENV
-        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-        echo $REPO_NAME
-        echo $repo_name
-        echo "REF=$REF" >> $GITHUB_ENV
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
       env:
-        GITREF: ${{ github.head_ref || github.ref_name }}
         GITHUB_REPOSITORY: ${{ github.repository }}
       shell: bash
 
@@ -61,27 +55,29 @@ runs:
       id: set_docker_tag
       run: |
         DOCKER_TAG=$(echo "${{ inputs.pr_sha }}" | cut -c1-7)
-        echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+        echo "docker_tag=${DOCKER_TAG}" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Prepare Deployment File
       run: |
-        cp "${{ inputs.templates_folder }}/deployment-template.yaml" deployment-template.yaml
-        # Create a new file with DOCKER_TAG replaced
-        sed "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-template.yaml > deployment-temp.yaml
+        # Copy the template file to a new file for modification
+        cp "${{ inputs.templates_folder }}/deployment-template.yaml" deployment-temp.yaml
+        
+        # Replace placeholders with actual values:
+        # Replace {{DOCKER_TAG}} with the Docker tag from the PR SHA.
+        sed -i "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-temp.yaml
+        
+        # Replace {{PR_NUMBER}} with the pull request number.
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" deployment-temp.yaml
-        sed -i "s|{{REPO_NAME}}-{{PR_NUMBER}}|${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}|g" deployment-temp.yaml
-      shell: bash
-
-    - name: Prepare Ingress File
-      run: |
-        cp "${{ inputs.templates_folder }}/ingress-template.yaml" ingress-template.yaml
-        sed "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev|g" ingress-template.yaml > ingress-temp.yaml
-        sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" ingress-temp.yaml
-        sed -i "s|{{REPO_NAME}}-{{PR_NUMBER}}|${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}|g" ingress-temp.yaml
+        
+        # Replace {{REPO_NAME}} with the extracted repository name.
+        sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" deployment-temp.yaml
+        
+        # Optional: list the modified file for debugging
+        cat deployment-temp.yaml
       shell: bash
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f deployment-temp.yaml && kubectl apply -f ingress-temp.yaml
+        kubectl apply -f deployment-temp.yaml
       shell: bash
