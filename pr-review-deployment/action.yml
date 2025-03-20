@@ -88,7 +88,7 @@ runs:
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f deployment-temp.yaml ingress-temp.yaml
+        kubectl apply -f deployment-temp.yaml -f ingress-temp.yaml
       shell: bash
 
     - name: Clean up
