@@ -60,29 +60,26 @@ runs:
 
     - name: Prepare Deployment File
       run: |
-        # Copy the template file to a new file for modification
+        # Copy the deployment template to a new file for modification
         cp "${{ inputs.templates_folder }}/deployment-template.yaml" deployment-temp.yaml
         
         # Replace placeholders with actual values:
-        # Replace {{DOCKER_TAG}} with the Docker tag from the PR SHA.
         sed -i "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-temp.yaml
-        
-        # Replace {{PR_NUMBER}} with the pull request number.
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" deployment-temp.yaml
-        
-        # Replace {{REPO_NAME}} with the extracted repository name.
         sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" deployment-temp.yaml
         
-        # Optional: list the modified file for debugging
+        # Optional: display the modified file for debugging
         cat deployment-temp.yaml
       shell: bash
     
     - name: Prepare Ingress File
       run: |
         cp "${{ inputs.templates_folder }}/ingress-template.yaml" ingress-temp.yaml
-        sed "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev|g" ingress-temp.yaml
+        sed -i "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev|g" ingress-temp.yaml
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" ingress-temp.yaml
         sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" ingress-temp.yaml
+        
+        # Optional: display the modified file for debugging
         cat ingress-temp.yaml
       shell: bash
 
