@@ -76,10 +76,17 @@ runs:
         # Optional: list the modified file for debugging
         cat deployment-temp.yaml
       shell: bash
+    
+    - name: Prepare Ingress File
+      run: |
+        cp "${{ inputs.templates_folder }}/ingress-template.yaml" ingress-temp.yaml
+        sed "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev|g" ingress-temp.yaml
+        sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" ingress-temp.yaml
+        sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" ingress-temp.yaml
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f deployment-temp.yaml
+        kubectl apply -f deployment-temp.yaml ingress-temp.yaml
       shell: bash
 
     - name: Clean up
