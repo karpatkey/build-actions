@@ -47,11 +47,7 @@ runs:
       id: repo-name
       run: |
         REPO_NAME=$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')
-        echo "repo_name=$REPO_NAME" >> $GITHUB_ENV
-        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-        echo $REPO_NAME
-        echo $repo_name
-        echo "REF=$REF" >> $GITHUB_ENV
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
       env:
         GITREF: ${{ github.head_ref || github.ref_name }}
         GITHUB_REPOSITORY: ${{ github.repository }}
@@ -67,7 +63,8 @@ runs:
     - name: Prepare Deployment File
       run: |
         cp "${{ inputs.templates_folder }}/deployment-template.yaml" deployment-template.yaml
-        sed -i "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-temp.yaml
+        # Create a new file with DOCKER_TAG replaced
+        sed "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-template.yaml > deployment-temp.yaml
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" deployment-temp.yaml
         sed -i "s|{{REPO_NAME}}-{{PR_NUMBER}}|${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}|g" deployment-temp.yaml
       shell: bash
