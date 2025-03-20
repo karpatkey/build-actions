@@ -83,6 +83,6 @@ runs:
       shell: bash
 
     - name: Clean up
-        run: |
-          rm deployment-temp.yaml
-          rm ingress-temp.yaml
+      run: |
+        rm deployment-temp.yaml
+        rm ingress-temp.yaml
