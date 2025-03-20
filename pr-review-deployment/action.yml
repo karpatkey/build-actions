@@ -86,3 +86,4 @@ runs:
       run: |
         rm deployment-temp.yaml
         rm ingress-temp.yaml
+      shell: bash
