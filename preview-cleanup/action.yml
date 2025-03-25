@@ -13,10 +13,6 @@ inputs:
   pr_number:
     description: "The pull request number to clean up"
     required: true
-  namespace:
-    description: "Kubernetes namespace where the resources are deployed"
-    required: false
-    default: "kpk-portal-pr-review"
 runs:
   using: "composite"
   steps:
@@ -54,7 +50,9 @@ runs:
 
     - name: Delete Kubernetes Resources
       run: |
-        kubectl delete deployment -n ${{ inputs.namespace }} ${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}
-        kubectl delete svc -n ${{ inputs.namespace }} ${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}
-        kubectl delete ing -n ${{ inputs.namespace }} ${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}
+        # Use dynamic namespace: "pr-review-<repo_name>"
+        NAMESPACE="pr-review-${{ steps.repo-name.outputs.repo_name }}"
+        kubectl delete deployment -n "$NAMESPACE" "${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
+        kubectl delete svc -n "$NAMESPACE" "${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
+        kubectl delete ing -n "$NAMESPACE" "${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
       shell: bash
