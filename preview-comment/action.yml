@@ -13,18 +13,12 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Extract Repository Name
+    - name: Extract Repository Name (lowercase)
       id: repo-name
       run: |
-        REPO_NAME="${GITHUB_REPOSITORY##*/}"
-
-        REF="${{ inputs.ref }}"
-        REF="${REF:-$GITREF}"
-
-        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-        echo "REF=$REF" >> $GITHUB_ENV
+        REPO_NAME=$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
       env:
-        GITREF: ${{ github.head_ref || github.ref_name }}
         GITHUB_REPOSITORY: ${{ github.repository }}
       shell: bash
 
