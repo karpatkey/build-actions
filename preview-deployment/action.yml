@@ -1,0 +1,109 @@
+name: "GKE and PR Review Deployment"
+description: "Authenticate to GCP, get GKE credentials, install kubectl, and deploy a PR review environment."
+inputs:
+  credentials_json:
+    description: "GCP service account credentials JSON"
+    required: true
+  cluster_name:
+    description: "Name of the GKE cluster"
+    required: true
+  region:
+    description: "Region (or location) of the GKE cluster"
+    required: true
+  pr_sha:
+    description: "The commit SHA for the PR"
+    required: true
+  pr_number:
+    description: "The pull request number"
+    required: true
+  templates_folder:
+    description: "Path (from the root of the caller repo) where the deployment templates reside"
+    required: true
+  port:
+    description: "Port for container and service (default is 80)"
+    required: false
+    default: "80"
+  registry:
+    description: "Default Docker registry URL"
+    required: false
+    default: "europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey"
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Authenticate to GCP
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ inputs.credentials_json }}
+
+    - name: Get GKE credentials
+      id: get-credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ inputs.cluster_name }}
+        location: ${{ inputs.region }}
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+      shell: bash
+
+    - name: Extract Repository Name (lowercase)
+      id: repo-name
+      run: |
+        REPO_NAME=$(echo "${GITHUB_REPOSITORY##*/}" | tr '[:upper:]' '[:lower:]')
+        echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      shell: bash
+
+    - name: Set Docker tag
+      id: set_docker_tag
+      run: |
+        DOCKER_TAG=$(echo "${{ inputs.pr_sha }}" | cut -c1-7)
+        echo "docker_tag=${DOCKER_TAG}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Prepare Deployment File
+      run: |
+        # Copy the deployment template to a new file for modification
+        cp "${{ inputs.templates_folder }}/deployment-template.yaml" deployment-temp.yaml
+        
+        # Replace placeholders with actual values:
+        sed -i "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-temp.yaml
+        sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" deployment-temp.yaml
+        sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" deployment-temp.yaml
+        sed -i "s|{{PORT}}|${{ inputs.port }}|g" deployment-temp.yaml
+        sed -i "s|{{REGISTRY}}|${{ inputs.registry }}|g" deployment-temp.yaml
+        
+        # Optional: display the modified file for debugging
+        cat deployment-temp.yaml
+      shell: bash
+    
+    - name: Prepare Ingress File
+      run: |
+        cp "${{ inputs.templates_folder }}/ingress-template.yaml" ingress-temp.yaml
+        sed -i "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev|g" ingress-temp.yaml
+        sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" ingress-temp.yaml
+        sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" ingress-temp.yaml
+        sed -i "s|{{PORT}}|${{ inputs.port }}|g" ingress-temp.yaml
+        
+        # Optional: display the modified file for debugging
+        cat ingress-temp.yaml
+      shell: bash
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f deployment-temp.yaml -f ingress-temp.yaml
+      shell: bash
+
+    - name: Clean up
+      run: |
+        rm deployment-temp.yaml
+        rm ingress-temp.yaml
+      shell: bash
