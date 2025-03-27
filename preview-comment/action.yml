@@ -28,7 +28,7 @@ runs:
       run: |
         PR_NUMBER="${{ inputs.pr_number }}"
         # Build the deployment URL using PR number and repository name
-        DEPLOYMENT_URL="https://${PR_NUMBER}-${{ steps.repo-name.outputs.repo_name }}.karpatkey.dev"
+        DEPLOYMENT_URL="https://${PR_NUMBER}-${{ steps.repo-name.outputs.repo_name }}.kpk.dev"
         echo "deployment_url=${DEPLOYMENT_URL}" >> $GITHUB_OUTPUT
 
     - name: Comment on PR
