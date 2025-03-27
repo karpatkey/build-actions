@@ -76,6 +76,7 @@ runs:
         
         # Replace placeholders with actual values:
         sed -i "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-temp.yaml
+        sed -i "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.kpk.dev|g" deployment-temp.yaml
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" deployment-temp.yaml
         sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" deployment-temp.yaml
         sed -i "s|{{PORT}}|${{ inputs.port }}|g" deployment-temp.yaml
