@@ -1,5 +1,5 @@
 name: Build Docker Image
-description: Build Docker image using Kaniko
+description: Build Docker image using Kaniko and optionally update prod tag
 inputs:
   ref:
     description: Ref. Git reference (branch, tag, or commit)
@@ -13,6 +13,12 @@ inputs:
   dockerfile:
     description: Path to the Dockerfile
     required: true
+  github_token:
+    description: GitHub token for repo access
+    required: false
+  kpk_devops_pat:
+    description: Personal access token to push to kpk-devops
+    required: false
 
 runs:
   using: composite
@@ -28,24 +34,13 @@ runs:
     - name: Set Environment Variables
       shell: bash
       run: |
-        # Extract repository name (karpatkey/my-repo -> my-repo)
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
-
         REF="${{ inputs.ref }}"
-        REF="${REF:-$GITREF}"
-
         REGISTRY="${{ inputs.registry }}"
-        REGISTRY="${REGISTRY:-${DOCKER_REGISTRY:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey}}"
-
         IMAGE="${{ inputs.image }}"
-        IMAGE="${IMAGE:-${DOCKER_IMAGE:-${REPO_NAME}}}"
-
         DOCKERFILE="${{ inputs.dockerfile }}"
-        DOCKERFILE="${DOCKERFILE:-${DOCKER_DOCKERFILE:-./Dockerfile}}"
-        DEFAULT_IMAGE=$REGISTRY/$IMAGE
-        FULL_IMAGE_NAME="${DOCKER_IMAGE_NAME-$DEFAULT_IMAGE}"
+        FULL_IMAGE_NAME="${REGISTRY}/${IMAGE}"
 
-        # Export for later steps
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
         echo "REF=$REF" >> $GITHUB_ENV
         echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
@@ -53,7 +48,6 @@ runs:
         echo "DOCKERFILE=$DOCKERFILE" >> $GITHUB_ENV
         echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
       env:
-        GITREF: ${{ github.head_ref || github.ref_name }}
         GITHUB_REPOSITORY: ${{ github.repository }}
 
     - name: Run Docker build script
@@ -74,7 +68,7 @@ runs:
           git config --global user.name "github-actions"
           git config --global user.email "ci@karpatkey.com"
 
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/karpatkey/kpk-devops.git
+          git clone https://x-access-token:${KPK_DEVOPS_PAT}@github.com/karpatkey/kpk-devops.git
           cd kpk-devops
 
           sed -i "s|\(image: .*\):.*|\1:${TAG_NAME}|" "$FILE_PATH"
@@ -85,14 +79,13 @@ runs:
           - Updated file: ${FILE_PATH}
           - New image tag: ${FULL_IMAGE}
           - Triggered by GitHub release."
-                git push origin main
-              else
-                echo "ℹ️ Not a release event, skipping prod update."
-              fi
+          git push origin main
+        else
+          echo "ℹ️ Not a release event, skipping prod update."
+        fi
       env:
         GITHUB_EVENT_NAME: ${{ github.event_name }}
         GITHUB_EVENT_ACTION: ${{ github.event.action }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_REF: ${{ github.ref }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        KPK_DEVOPS_PAT: ${{ secrets.KPK_DEVOPS_PAT }}
+        KPK_DEVOPS_PAT: ${{ inputs.kpk_devops_pat }}
