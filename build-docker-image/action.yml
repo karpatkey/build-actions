@@ -34,12 +34,18 @@ runs:
     - name: Set Environment Variables
       shell: bash
       run: |
+        # Extract repository name (karpatkey/my-repo -> my-repo)
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
         REF="${{ inputs.ref }}"
+        REF="${REF:-$GITREF}"
         REGISTRY="${{ inputs.registry }}"
+        REGISTRY="${REGISTRY:-${DOCKER_REGISTRY:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey}}"
         IMAGE="${{ inputs.image }}"
+        IMAGE="${IMAGE:-${DOCKER_IMAGE:-${REPO_NAME}}}"
         DOCKERFILE="${{ inputs.dockerfile }}"
-        FULL_IMAGE_NAME="${REGISTRY}/${IMAGE}"
+        DOCKERFILE="${DOCKERFILE:-${DOCKER_DOCKERFILE:-./Dockerfile}}"
+        DEFAULT_IMAGE=$REGISTRY/$IMAGE
+        FULL_IMAGE_NAME="${DOCKER_IMAGE_NAME-$DEFAULT_IMAGE}"
 
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
         echo "REF=$REF" >> $GITHUB_ENV
