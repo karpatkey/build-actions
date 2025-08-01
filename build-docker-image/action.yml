@@ -1,5 +1,5 @@
 name: Build Docker Image
-description: Build Docker image using Kaniko and optionally update prod tag
+description: Build Docker image using Kaniko
 inputs:
   ref:
     description: Ref. Git reference (branch, tag, or commit)
@@ -13,11 +13,8 @@ inputs:
   dockerfile:
     description: Path to the Dockerfile
     required: true
-  github_token:
-    description: GitHub token for repo access
-    required: false
   kpk_devops_pat:
-    description: Personal access token to push to kpk-devops
+    description: PAT token to push to kpk-devops
     required: false
 
 runs:
@@ -36,17 +33,22 @@ runs:
       run: |
         # Extract repository name (karpatkey/my-repo -> my-repo)
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
+
         REF="${{ inputs.ref }}"
         REF="${REF:-$GITREF}"
+
         REGISTRY="${{ inputs.registry }}"
         REGISTRY="${REGISTRY:-${DOCKER_REGISTRY:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey}}"
+
         IMAGE="${{ inputs.image }}"
         IMAGE="${IMAGE:-${DOCKER_IMAGE:-${REPO_NAME}}}"
+
         DOCKERFILE="${{ inputs.dockerfile }}"
         DOCKERFILE="${DOCKERFILE:-${DOCKER_DOCKERFILE:-./Dockerfile}}"
         DEFAULT_IMAGE=$REGISTRY/$IMAGE
         FULL_IMAGE_NAME="${DOCKER_IMAGE_NAME-$DEFAULT_IMAGE}"
 
+        # Export for later steps
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
         echo "REF=$REF" >> $GITHUB_ENV
         echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
@@ -54,41 +56,16 @@ runs:
         echo "DOCKERFILE=$DOCKERFILE" >> $GITHUB_ENV
         echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
       env:
+        GITREF: ${{ github.head_ref || github.ref_name }}
         GITHUB_REPOSITORY: ${{ github.repository }}
 
     - name: Run Docker build script
       run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
       shell: bash
-
-    - name: Conditionally update prod tag if this is a release
+    
+    - name: Conditionally update prod on release
       shell: bash
-      run: |
-        if [[ "${GITHUB_EVENT_NAME}" == "release" && "${GITHUB_EVENT_ACTION}" == "published" ]]; then
-          echo "🔄 Updating kpk-devops manifest for production release..."
-
-          REPO_NAME="${GITHUB_REPOSITORY##*/}"
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          FILE_PATH="GitOps/${REPO_NAME}/deployment.yaml"
-          FULL_IMAGE="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
-
-          git config --global user.name "github-actions"
-          git config --global user.email "ci@karpatkey.com"
-
-          git clone https://x-access-token:${KPK_DEVOPS_PAT}@github.com/karpatkey/kpk-devops.git
-          cd kpk-devops
-
-          sed -i "s|\(image: .*\):.*|\1:${TAG_NAME}|" "$FILE_PATH"
-
-          git add "$FILE_PATH"
-          git commit -m "chore(ci): update prod image for ${REPO_NAME} to ${TAG_NAME}
-
-          - Updated file: ${FILE_PATH}
-          - New image tag: ${FULL_IMAGE}
-          - Triggered by GitHub release."
-          git push origin main
-        else
-          echo "ℹ️ Not a release event, skipping prod update."
-        fi
+      run: ${{ github.action_path }}/update_prod_if_release.sh
       env:
         GITHUB_EVENT_NAME: ${{ github.event_name }}
         GITHUB_EVENT_ACTION: ${{ github.event.action }}
