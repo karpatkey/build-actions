@@ -60,41 +60,41 @@ runs:
       run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
       shell: bash
 
-  update_prod_on_release:
-    if: github.event_name == 'release' && github.event.action == 'published'
-    runs-on: ubuntu-latest
-    name: Update Prod Deployment in kpk-devops
-    env:
-      REPO_NAME: ${{ github.event.repository.name }}
-      TAG_NAME: ${{ github.event.release.tag_name }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Checkout kpk-devops repo
-        uses: actions/checkout@v4
-        with:
-          repository: karpatkey/kpk-devops
-          token: ${{ secrets.KPK_DEVOPS_PAT }}
-          ref: main
+    - update_prod_on_release:
+      if: github.event_name == 'release' && github.event.action == 'published'
+      runs-on: ubuntu-latest
+      name: Update Prod Deployment in kpk-devops
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        TAG_NAME: ${{ github.event.release.tag_name }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      steps:
+        - name: Checkout kpk-devops repo
+          uses: actions/checkout@v4
+          with:
+            repository: karpatkey/kpk-devops
+            token: ${{ secrets.KPK_DEVOPS_PAT }}
+            ref: main
 
-      - name: Update image tag in prod manifest
-        run: |
-          FILE_PATH="GitOps/${REPO_NAME}/deployment.yaml"
-          sed -i "s|\(image: .*\):.*|\1:${TAG_NAME}|" "$FILE_PATH"
+        - name: Update image tag in prod manifest
+          run: |
+            FILE_PATH="GitOps/${REPO_NAME}/deployment.yaml"
+            sed -i "s|\(image: .*\):.*|\1:${TAG_NAME}|" "$FILE_PATH"
 
-      - name: Commit and push changes
-        run: |
-          FILE_PATH="GitOps/${REPO_NAME}/deployment.yaml"
-          FULL_IMAGE="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG_NAME}"
+        - name: Commit and push changes
+          run: |
+            FILE_PATH="GitOps/${REPO_NAME}/deployment.yaml"
+            FULL_IMAGE="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
+            RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG_NAME}"
 
-          git config user.name "github-actions"
-          git config user.email "ci@karpatkey.com"
-          git add "$FILE_PATH"
-          git commit -m "chore(ci): update prod image for ${REPO_NAME} to ${TAG_NAME}
+            git config user.name "github-actions"
+            git config user.email "ci@karpatkey.com"
+            git add "$FILE_PATH"
+            git commit -m "chore(ci): update prod image for ${REPO_NAME} to ${TAG_NAME}
 
-          - Updated file: ${FILE_PATH}
-          - New image tag: ${FULL_IMAGE}
-          - Triggered by GitHub release: ${RELEASE_URL} "
-          
-          git push origin main
+            - Updated file: ${FILE_PATH}
+            - New image tag: ${FULL_IMAGE}
+            - Triggered by GitHub release: ${RELEASE_URL} "
+            
+            git push origin main
 
