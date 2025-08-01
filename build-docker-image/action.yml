@@ -13,9 +13,9 @@ inputs:
   dockerfile:
     description: Path to the Dockerfile
     required: true
-  kpk_devops_pat:
-    description: PAT token to push to kpk-devops
-    required: false
+  # kpk_devops_pat:
+  #   description: PAT token to push to kpk-devops
+  #   required: false
 
 runs:
   using: composite
@@ -71,4 +71,4 @@ runs:
         GITHUB_EVENT_ACTION: ${{ github.event.action }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_REF: ${{ github.ref }}
-        KPK_DEVOPS_PAT: ${{ inputs.kpk_devops_pat }}
+        # KPK_DEVOPS_PAT: ${{ inputs.kpk_devops_pat }}
