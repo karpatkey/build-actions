@@ -6,7 +6,7 @@ if [[ "$GITHUB_EVENT_NAME" == "release" && "$GITHUB_EVENT_ACTION" == "published"
 
   REPO_NAME="${GITHUB_REPOSITORY##*/}"
   TAG_NAME="${GITHUB_REF#refs/tags/}"
-  FILE_PATH="GitOps/${REPO_NAME}/deployment.yaml"
+  FILE_PATH="GitOps/${REPO_NAME}/prod/deployment.yaml"
   FULL_IMAGE="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
 
   git config --global user.name "github-actions"
