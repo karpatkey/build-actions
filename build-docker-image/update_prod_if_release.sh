@@ -6,7 +6,6 @@ if [[ "$GITHUB_EVENT_NAME" == "release" && "$GITHUB_EVENT_ACTION" == "published"
 
   REPO_NAME="${GITHUB_REPOSITORY##*/}"
   TAG_NAME="${GITHUB_REF#refs/tags/}"
-  IMAGE_TAG="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
   FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${REPO_NAME}.yaml"
 
   git config --global user.name "github-actions"
@@ -17,20 +16,26 @@ if [[ "$GITHUB_EVENT_NAME" == "release" && "$GITHUB_EVENT_ACTION" == "published"
 
   mkdir -p "$(dirname "$FILE_PATH")"
 
-  # NOTE: No leading indentation in YAML block to avoid invalid formatting
-  cat > "$FILE_PATH" <<EOF
-kustomize:
-  images:
-    - ${IMAGE_TAG}
-EOF
+  {
+    echo "kustomize:"
+    echo "  images:"
+    if [[ "$REPO_NAME" == "karpatkey-tokenized-fund" ]]; then
+      # Special case: Two images for this repo
+      echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/karpatkey-tokenized-fund-frontend:${TAG_NAME}"
+      echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/karpatkey-tokenized-fund-backend:${TAG_NAME}"
+    else
+      # Default: Single image for all other repos
+      echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
+    fi
+  } > "$FILE_PATH"
 
   git add "$FILE_PATH"
-  git commit -m "chore(ci): update image tag for ${REPO_NAME} to ${TAG_NAME}
+  git commit -m "chore(ci): update image tags for ${REPO_NAME} to ${TAG_NAME}
 
 - Created or updated: ${FILE_PATH}
-- Image: ${IMAGE_TAG}
 - Triggered by GitHub release."
   git push origin main
+
 else
   echo "ℹ️ Not a release event, skipping prod update."
 fi
