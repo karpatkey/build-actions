@@ -7,7 +7,7 @@ if [[ "$GITHUB_EVENT_NAME" == "release" && "$GITHUB_EVENT_ACTION" == "published"
   REPO_NAME="${GITHUB_REPOSITORY##*/}"
   TAG_NAME="${GITHUB_REF#refs/tags/}"
   IMAGE_TAG="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG_NAME}"
-  FILE_PATH="GitOps/${REPO_NAME}/prod/.image-updater-${REPO_NAME}-prod.yaml"
+  FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${REPO_NAME}.yaml"
 
   git config --global user.name "github-actions"
   git config --global user.email "ci@karpatkey.com"
