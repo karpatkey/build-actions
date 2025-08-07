@@ -54,13 +54,16 @@ fi
 
 git add "$FILE_PATH"
 
+FINAL_IMAGE="${CUSTOM_IMAGE_LIST:-europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}}:${TAG}"
+
 # Commit if changes exist
 if ! git diff --quiet HEAD -- "$FILE_PATH"; then
   
   git commit -m "chore(ci): update ${REPO_NAME} to ${TAG}
 
 - Created or updated: ${FILE_PATH}
-- Triggered by GitHub release."
+- Image: ${FINAL_IMAGE}
+- Triggered by GitHub release in ${REPO_NAME} ."
   git push origin main
   log "✅ Tag update pushed successfully"
 else
