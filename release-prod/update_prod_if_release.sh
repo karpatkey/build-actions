@@ -52,9 +52,11 @@ else
   echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG}" >> "$FILE_PATH"
 fi
 
+git add "$FILE_PATH"
+
 # Commit if changes exist
 if ! git diff --quiet HEAD -- "$FILE_PATH"; then
-  git add "$FILE_PATH"
+  
   git commit -m "chore(ci): update ${REPO_NAME} to ${TAG}
 
 - Created or updated: ${FILE_PATH}
