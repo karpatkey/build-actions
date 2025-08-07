@@ -59,12 +59,3 @@ runs:
     - name: Run Docker build script
       run: ${{ github.action_path }}/build_and_push.sh $PR_SHA
       shell: bash
-    
-    - name: Conditionally update prod on release
-      shell: bash
-      run: ${{ github.action_path }}/update_prod_if_release.sh
-      env:
-        GITHUB_EVENT_NAME: ${{ github.event_name }}
-        GITHUB_EVENT_ACTION: ${{ github.event.action }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
-        GITHUB_REF: ${{ github.ref }}
