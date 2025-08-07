@@ -63,7 +63,7 @@ if ! git diff --quiet HEAD -- "$FILE_PATH"; then
 
 - Created or updated: ${FILE_PATH}
 - Image: ${FINAL_IMAGE}
-- Triggered by GitHub release in ${REPO_NAME} ."
+- Triggered by GitHub release in ${REPO_NAME} application repository."
   git push origin main
   log "✅ Tag update pushed successfully"
 else
