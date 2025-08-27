@@ -1,0 +1,43 @@
+name: Update Docker Image Tags
+description: Update Docker image tags in kpk-devops repository for ArgoCD deployments
+
+inputs:
+  custom_image_list:
+    description: Pipe-separated or newline-separated list of full image names
+    required: false
+    default: ""
+  custom_path:
+    description: Custom path in kpk-devops repo (overrides default GitOps/{REPO_NAME}/prod/)
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Set Environment Variables
+      shell: bash
+      run: |
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+
+        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+        echo "CUSTOM_IMAGE_LIST=${{ inputs.custom_image_list }}" >> $GITHUB_ENV
+        echo "CUSTOM_PATH=${{ inputs.custom_path }}" >> $GITHUB_ENV
+
+        echo "🔧 Configuration:"
+        echo "  Repository: $REPO_NAME"
+        echo "  Custom Images: ${{ inputs.custom_image_list }}"
+        echo "  Custom Path: ${{ inputs.custom_path }}"
+      env:
+        GITHUB_REPOSITORY: ${{ github.repository }}
+
+    - name: Update Image Tags in kpk-devops
+      shell: bash
+      run: ${{ github.action_path }}/update_prod_if_release.sh
+      env:
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+        GITHUB_EVENT_ACTION: ${{ github.event.action }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_REF: ${{ github.ref }}
+        KPK_DEVOPS_PAT: ${{ env.KPK_DEVOPS_PAT }}
+        CUSTOM_IMAGE_LIST: ${{ env.CUSTOM_IMAGE_LIST }}
+        CUSTOM_PATH: ${{ env.CUSTOM_PATH }}
