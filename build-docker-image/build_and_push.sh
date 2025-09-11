@@ -90,12 +90,12 @@ docker run --rm \
   --cache=true \
   --cache-dir=/cache \
   --use-new-run \
-  --snapshot-mode=time \
-  --cache-copy-layers \
+  --single-snapshot \
+  --snapshot-mode=redo \
   --compressed-caching=false \
   --cleanup \
   --cache-repo="$FULL_IMAGE_NAME"
-
+  
 echo "Image pushed to registry: $DOCKER_TAG"
 if [ -n "$GIT_TAG" ]; then
   echo "Image also tagged with Git tag: $DOCKER_TAG_WITH_GIT_TAG"
