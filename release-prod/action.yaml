@@ -20,9 +20,6 @@ runs:
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
 
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-        # echo "CUSTOM_IMAGE_LIST=${{ inputs.custom_image_list }}" >> $GITHUB_ENV
-        # echo "CUSTOM_PATH=${{ inputs.custom_path }}" >> $GITHUB_ENV
-
         echo "🔧 Configuration:"
         echo "  Repository: $REPO_NAME"
         echo "  Custom Images: ${{ inputs.custom_image_list }}"
