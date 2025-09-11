@@ -42,24 +42,15 @@ mkdir -p "$(dirname "$FILE_PATH")"
 echo "kustomize:" > "$FILE_PATH"
 echo "  images:" >> "$FILE_PATH"
 
-# if [[ -n "${CUSTOM_IMAGE_LIST:-}" ]]; then
-#   log "ℹ️ Using custom image list:"
-#   echo "$CUSTOM_IMAGE_LIST" | tr '|' '\n' | while read -r image; do
-#     trimmed=$(echo "$image" | xargs)
-#     [[ -n "$trimmed" ]] && echo "    - ${trimmed}:${TAG}" >> "$FILE_PATH"
-#   done
-# else
-#   echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG}" >> "$FILE_PATH"
-# fi
-
-# Replace the problematic line with:
 if [[ -n "${CUSTOM_IMAGE_LIST:-}" ]]; then
-  FINAL_IMAGE="${CUSTOM_IMAGE_LIST}:${TAG}"
+  log "ℹ️ Using custom image list:"
+  echo "$CUSTOM_IMAGE_LIST" | tr '|' '\n' | while read -r image; do
+    trimmed=$(echo "$image" | xargs)
+    [[ -n "$trimmed" ]] && echo "    - ${trimmed}:${TAG}" >> "$FILE_PATH"
+  done
 else
-  FINAL_IMAGE="europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG}"
+  echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG}" >> "$FILE_PATH"
 fi
-
-
 
 git add "$FILE_PATH"
 
