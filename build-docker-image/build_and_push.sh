@@ -90,8 +90,8 @@ docker run --rm \
   --cache=true \
   --cache-dir=/cache \
   --use-new-run \
-  --single-snapshot \
-  --snapshot-mode=redo \
+  --snapshot-mode=time \
+  --cache-copy-layers \
   --compressed-caching=false \
   --cleanup \
   --cache-repo="$FULL_IMAGE_NAME"
