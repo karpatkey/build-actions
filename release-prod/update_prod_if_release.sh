@@ -4,11 +4,11 @@ set -e
 log() { echo "[$(date +'%H:%M:%S')] $1"; }
 error() { echo "[ERROR] $1" >&2; exit 1; }
 
-# # Ensure we're on a release event
-# if [[ "$GITHUB_EVENT_NAME" != "release" || "${GITHUB_EVENT_ACTION:-}" != "published" ]]; then
-#   log "Not a release event, skipping update"
-#   exit 0
-# fi
+# Ensure we're on a release event
+if [[ "$GITHUB_EVENT_NAME" != "release" || "${GITHUB_EVENT_ACTION:-}" != "published" ]]; then
+  log "Not a release event, skipping update"
+  exit 0
+fi
 
 # Validate inputs
 [[ -z "$KPK_DEVOPS_PAT" ]] && error "KPK_DEVOPS_PAT is required"
