@@ -39,5 +39,8 @@ runs:
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_REF: ${{ github.ref }}
         KPK_DEVOPS_PAT: ${{ env.KPK_DEVOPS_PAT }}
-        CUSTOM_IMAGE_LIST: ${{ env.CUSTOM_IMAGE_LIST }}
-        CUSTOM_PATH: ${{ env.CUSTOM_PATH }}
+        CUSTOM_IMAGE_LIST: ${{ inputs.custom_image_list }}   # <-- pass directly
+        CUSTOM_PATH: ${{ inputs.custom_path }}               
+        # CUSTOM_IMAGE_LIST: ${{ env.CUSTOM_IMAGE_LIST }}
+        # CUSTOM_PATH: ${{ env.CUSTOM_PATH }}
+
