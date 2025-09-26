@@ -42,17 +42,31 @@ mkdir -p "$(dirname "$FILE_PATH")"
 echo "kustomize:" > "$FILE_PATH"
 echo "  images:" >> "$FILE_PATH"
 
-log "CUSTOM_IMAGE_LIST: $CUSTOM_IMAGE_LIST"
+# if [[ -n "${CUSTOM_IMAGE_LIST:-}" ]]; then
+#   log "ℹ️ Using custom image list:"
+#   # echo "$CUSTOM_IMAGE_LIST" | tr '|' '\n' | while read -r image; do
+#   echo "$CUSTOM_IMAGE_LIST" | while read -r image; do
+#     trimmed=$(echo "$image" | xargs)
+#     [[ -n "$trimmed" ]] && echo "    - ${trimmed}:${TAG}" >> "$FILE_PATH"
+#   done
+# else
+#   echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG}" >> "$FILE_PATH"
+# fi
+
+log "CUSTOM_IMAGE_LIST: ${CUSTOM_IMAGE_LIST:-'(none)'}"
 log "FILE_PATH: $FILE_PATH"
 log "TAG: $TAG"
 
 if [[ -n "${CUSTOM_IMAGE_LIST:-}" ]]; then
   log "ℹ️ Using custom image list:"
-  # echo "$CUSTOM_IMAGE_LIST" | tr '|' '\n' | while read -r image; do
-  echo "$CUSTOM_IMAGE_LIST" | while read -r image; do
-    trimmed=$(echo "$image" | xargs)
-    [[ -n "$trimmed" ]] && echo "    - ${trimmed}:${TAG}" >> "$FILE_PATH"
-  done
+  # Avoid a pipeline with set -e; trim lines safely
+  while IFS= read -r image || [[ -n "$image" ]]; do
+    # trim leading/trailing whitespace
+    trimmed="${image#"${image%%[![:space:]]*}"}"
+    trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+    [[ -z "$trimmed" ]] && continue
+    echo "    - ${trimmed}:${TAG}" >> "$FILE_PATH"
+  done <<< "${CUSTOM_IMAGE_LIST}"
 else
   echo "    - europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey/${REPO_NAME}:${TAG}" >> "$FILE_PATH"
 fi
