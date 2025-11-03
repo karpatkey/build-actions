@@ -18,16 +18,16 @@ REPO_NAME="${GITHUB_REPOSITORY##*/}"
 TAG="${GITHUB_REF#refs/tags/}"
 
 
-BASENAME="${OVERRIDE_BASENAME:-}"
+# BASENAME="${OVERRIDE_BASENAME:-}"
 if [[ -z "$BASENAME" ]]; then
-  BASENAME="$REPO_NAME"  # fallback to old behavior
+  OVERRIDE_BASENAME="$REPO_NAME"  # fallback to old behavior
 fi
 
 # Determine final YAML path
 if [[ -n "${CUSTOM_PATH:-}" ]]; then
-  FILE_PATH="${CUSTOM_PATH}/.argocd-source-${BASENAME}.yaml"
+  FILE_PATH="${CUSTOM_PATH}/.argocd-source-${OVERRIDE_BASENAME}.yaml"
 else
-  FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${BASENAME}.yaml"
+  FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${OVERRIDE_BASENAME}.yaml"
 fi
 
 log "🔄 Updating ArgoCD override: $FILE_PATH with tag $TAG"
