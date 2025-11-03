@@ -27,7 +27,7 @@ fi
 if [[ -n "${CUSTOM_PATH:-}" ]]; then
   FILE_PATH="${CUSTOM_PATH}/.argocd-source-${BASENAME}.yaml"
 else
-  FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${REPO_NAME}.yaml"
+  FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${BASENAME}.yaml"
 fi
 
 log "🔄 Updating ArgoCD override: $FILE_PATH with tag $TAG"
