@@ -43,7 +43,7 @@ runs:
         KPK_DEVOPS_PAT: ${{ env.KPK_DEVOPS_PAT }}
         CUSTOM_IMAGE_LIST: ${{ inputs.custom_image_list }}   # <-- pass directly
         CUSTOM_PATH: ${{ inputs.custom_path }}        
-        # OVERRIDE_BASENAME: ${{ inputs.override_basename }}       
+        OVERRIDE_BASENAME: ${{ inputs.override_basename }}       
         # CUSTOM_IMAGE_LIST: ${{ env.CUSTOM_IMAGE_LIST }}
         # CUSTOM_PATH: ${{ env.CUSTOM_PATH }}
 
