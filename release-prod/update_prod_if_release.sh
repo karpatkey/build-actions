@@ -19,7 +19,7 @@ TAG="${GITHUB_REF#refs/tags/}"
 
 
 # BASENAME="${OVERRIDE_BASENAME:-}"
-if [[ -z "$BASENAME" ]]; then
+if [[ -z "$OVERRIDE_BASENAME" ]]; then
   OVERRIDE_BASENAME="$REPO_NAME"  # fallback to old behavior
 fi
 
