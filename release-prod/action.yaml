@@ -10,6 +10,10 @@ inputs:
     description: Custom path in kpk-devops repo (overrides default GitOps/{REPO_NAME}/prod/)
     required: false
     default: ""
+  override_basename:
+    description: Basename for .argocd-source-<BASENAME>.yaml (must equal ArgoCD Application metadata.name)
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -24,6 +28,7 @@ runs:
         echo "  Repository: $REPO_NAME"
         echo "  Custom Images: ${{ inputs.custom_image_list }}"
         echo "  Custom Path: ${{ inputs.custom_path }}"
+        echo "  Override Basename: ${{ inputs.override_basename }}"
       env:
         GITHUB_REPOSITORY: ${{ github.repository }}
 
@@ -37,7 +42,8 @@ runs:
         GITHUB_REF: ${{ github.ref }}
         KPK_DEVOPS_PAT: ${{ env.KPK_DEVOPS_PAT }}
         CUSTOM_IMAGE_LIST: ${{ inputs.custom_image_list }}   # <-- pass directly
-        CUSTOM_PATH: ${{ inputs.custom_path }}               
+        CUSTOM_PATH: ${{ inputs.custom_path }}        
+        # OVERRIDE_BASENAME: ${{ inputs.override_basename }}       
         # CUSTOM_IMAGE_LIST: ${{ env.CUSTOM_IMAGE_LIST }}
         # CUSTOM_PATH: ${{ env.CUSTOM_PATH }}
 

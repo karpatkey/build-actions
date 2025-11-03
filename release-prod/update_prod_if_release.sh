@@ -17,9 +17,15 @@ fi
 REPO_NAME="${GITHUB_REPOSITORY##*/}"
 TAG="${GITHUB_REF#refs/tags/}"
 
+
+BASENAME="${OVERRIDE_BASENAME:-}"
+if [[ -z "$BASENAME" ]]; then
+  BASENAME="$REPO_NAME"  # fallback to old behavior
+fi
+
 # Determine final YAML path
 if [[ -n "${CUSTOM_PATH:-}" ]]; then
-  FILE_PATH="${CUSTOM_PATH}/.argocd-source-${REPO_NAME}.yaml"
+  FILE_PATH="${CUSTOM_PATH}/.argocd-source-${BASENAME}.yaml"
 else
   FILE_PATH="GitOps/${REPO_NAME}/prod/.argocd-source-${REPO_NAME}.yaml"
 fi
