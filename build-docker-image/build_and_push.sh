@@ -78,7 +78,6 @@ docker run --rm \
   -v "$(pwd)":/workspace \
   -v "$(pwd)/.cache":/cache \
   -v "$HOME/.docker/config.json":/kaniko/.docker/config.json:ro \
-  -e GOOGLE_APPLICATION_CREDENTIALS=/kaniko/gcloud.json \
   gcr.io/kaniko-project/executor:v1.23.2 \
   --context . \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
