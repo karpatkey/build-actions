@@ -32,43 +32,25 @@ GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcloud.json"
 # Activate the service account using the JSON key.
 gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
 
-# # Configure Docker to use gcloud as a credential helper for your registry.
-# # Make sure that DOCKER_REGISTRY is set to your Artifact Registry domain (e.g. "europe-docker.pkg.dev").
-# gcloud auth configure-docker "$REGISTRY" --quiet
+# Configure Docker to use gcloud as a credential helper for your registry.
+# Make sure that DOCKER_REGISTRY is set to your Artifact Registry domain (e.g. "europe-docker.pkg.dev").
+gcloud auth configure-docker "$REGISTRY" --quiet
 
-gcloud auth configure-docker "${REGISTRY%%/*}" --quiet
+# Get a fresh access token using your service account credentials.
+ACCESS_TOKEN=$(gcloud auth print-access-token)
 
-REGISTRY_HOST="${REGISTRY%%/*}"
-
-ACCESS_TOKEN="$(gcloud auth print-access-token)"
-
-mkdir -p "$HOME/.docker"
-cat > "$HOME/.docker/config.json" <<EOF
+# Create a Docker config that includes the token directly.
+mkdir -p $HOME/.docker
+cat > $HOME/.docker/config.json <<EOF
 {
   "auths": {
-    "${REGISTRY_HOST}": {
+    "$REGISTRY": {
       "username": "oauth2accesstoken",
-      "password": "${ACCESS_TOKEN}"
+      "password": "$ACCESS_TOKEN"
     }
   }
 }
 EOF
-
-# # Get a fresh access token using your service account credentials.
-# ACCESS_TOKEN=$(gcloud auth print-access-token)
-
-# # Create a Docker config that includes the token directly.
-# mkdir -p $HOME/.docker
-# cat > $HOME/.docker/config.json <<EOF
-# {
-#   "auths": {
-#     "$REGISTRY": {
-#       "username": "oauth2accesstoken",
-#       "password": "$ACCESS_TOKEN"
-#     }
-#   }
-# }
-# EOF
 
 
 
