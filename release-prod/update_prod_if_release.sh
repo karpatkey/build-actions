@@ -39,8 +39,8 @@ git config --global user.email "41898282+github-actions[bot]@users.noreply.githu
 TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
 
-git clone "https://x-access-token:${KPK_DEVOPS_PAT}@github.com/kpk/kpk-devops.git"
-cd kpk-devops
+git clone "https://x-access-token:${KPK_DEVOPS_PAT}@github.com/kpk/devops.git"
+cd devops
 
 mkdir -p "$(dirname "$FILE_PATH")"
 
