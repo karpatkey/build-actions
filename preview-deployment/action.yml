@@ -1,5 +1,5 @@
 name: "GKE and PR Review Deployment"
-description: "Authenticate to GCP, get GKE credentials, install kubectl, and deploy a PR review environment."
+description: "Authenticate to GCP, get GKE credentials, and deploy a PR review environment with readiness verification."
 inputs:
   credentials_json:
     description: "GCP service account credentials JSON"
@@ -27,12 +27,25 @@ inputs:
     description: "Default Docker registry URL"
     required: false
     default: "europe-docker.pkg.dev/karpatkey-data-warehouse/karpatkey"
+  rollout_timeout:
+    description: "Timeout for deployment rollout (default 120s)"
+    required: false
+    default: "120s"
+
+outputs:
+  deployment_url:
+    description: "The URL of the deployed preview environment"
+    value: ${{ steps.set_url.outputs.deployment_url }}
+  deployment_status:
+    description: "Whether the deployment rolled out successfully (success/failure)"
+    value: ${{ steps.verify.outputs.status }}
+
 runs:
   using: "composite"
   steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Authenticate to GCP
       id: auth
       uses: google-github-actions/auth@v2
@@ -46,12 +59,8 @@ runs:
         cluster_name: ${{ inputs.cluster_name }}
         location: ${{ inputs.region }}
 
-    - name: Install kubectl
-      run: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x ./kubectl
-        sudo mv ./kubectl /usr/local/bin/kubectl
-      shell: bash
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v4
 
     - name: Extract Repository Name (lowercase)
       id: repo-name
@@ -69,42 +78,60 @@ runs:
         echo "docker_tag=${DOCKER_TAG}" >> $GITHUB_OUTPUT
       shell: bash
 
+    - name: Set Deployment URL
+      id: set_url
+      run: |
+        echo "deployment_url=https://${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.kpk.dev" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Prepare Deployment File
       run: |
-        # Copy the deployment template to a new file for modification
         cp "${{ inputs.templates_folder }}/deployment-template.yaml" deployment-temp.yaml
-        
-        # Replace placeholders with actual values:
+
         sed -i "s|{{DOCKER_TAG}}|${{ steps.set_docker_tag.outputs.docker_tag }}|g" deployment-temp.yaml
         sed -i "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.kpk.dev|g" deployment-temp.yaml
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" deployment-temp.yaml
         sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" deployment-temp.yaml
         sed -i "s|{{PORT}}|${{ inputs.port }}|g" deployment-temp.yaml
         sed -i "s|{{REGISTRY}}|${{ inputs.registry }}|g" deployment-temp.yaml
-        
-        # Optional: display the modified file for debugging
+
         cat deployment-temp.yaml
       shell: bash
-    
+
     - name: Prepare Ingress File
       run: |
         cp "${{ inputs.templates_folder }}/ingress-template.yaml" ingress-temp.yaml
+
         sed -i "s|{{PR_SUBDOMAIN}}|${{ inputs.pr_number }}-${{ steps.repo-name.outputs.repo_name }}.kpk.dev|g" ingress-temp.yaml
         sed -i "s|{{PR_NUMBER}}|${{ inputs.pr_number }}|g" ingress-temp.yaml
         sed -i "s|{{REPO_NAME}}|${{ steps.repo-name.outputs.repo_name }}|g" ingress-temp.yaml
         sed -i "s|{{PORT}}|${{ inputs.port }}|g" ingress-temp.yaml
-        
-        # Optional: display the modified file for debugging
+
         cat ingress-temp.yaml
       shell: bash
 
     - name: Deploy to Kubernetes
       run: |
+        NAMESPACE="pr-review-${{ steps.repo-name.outputs.repo_name }}"
         kubectl apply -f deployment-temp.yaml -f ingress-temp.yaml
+        echo "namespace=${NAMESPACE}" >> $GITHUB_ENV
       shell: bash
 
-    - name: Clean up
+    - name: Verify deployment rollout
+      id: verify
       run: |
-        rm deployment-temp.yaml
-        rm ingress-temp.yaml
+        DEPLOY_NAME="${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
+        if kubectl rollout status "deployment/${DEPLOY_NAME}" -n "${namespace}" --timeout=${{ inputs.rollout_timeout }} 2>/dev/null; then
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "✅ Deployment ${DEPLOY_NAME} rolled out successfully"
+        else
+          echo "status=failure" >> $GITHUB_OUTPUT
+          echo "⚠️ Deployment ${DEPLOY_NAME} did not become ready within ${{ inputs.rollout_timeout }}"
+          kubectl describe "deployment/${DEPLOY_NAME}" -n "${namespace}" 2>/dev/null | tail -20
+        fi
+      shell: bash
+
+    - name: Clean up temp files
+      if: always()
+      run: rm -f deployment-temp.yaml ingress-temp.yaml
       shell: bash
