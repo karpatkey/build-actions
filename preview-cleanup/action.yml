@@ -1,5 +1,5 @@
 name: "PR Cleanup Deployment"
-description: "Authenticate with GCP, get GKE credentials, install kubectl, and delete PR deployment resources."
+description: "Authenticate with GCP, get GKE credentials, and delete PR deployment resources."
 inputs:
   credentials_json:
     description: "GCP service account credentials JSON"
@@ -32,12 +32,8 @@ runs:
         cluster_name: ${{ inputs.cluster_name }}
         location: ${{ inputs.region }}
 
-    - name: Install kubectl
-      run: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x ./kubectl
-        sudo mv ./kubectl /usr/local/bin/kubectl
-      shell: bash
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v4
 
     - name: Extract Repository Name (lowercase)
       id: repo-name
@@ -50,9 +46,10 @@ runs:
 
     - name: Delete Kubernetes Resources
       run: |
-        # Use dynamic namespace: "pr-review-<repo_name>"
         NAMESPACE="pr-review-${{ steps.repo-name.outputs.repo_name }}"
-        kubectl delete deployment -n "$NAMESPACE" "${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
-        kubectl delete svc -n "$NAMESPACE" "${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
-        kubectl delete ing -n "$NAMESPACE" "${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
+        DEPLOY_NAME="${{ steps.repo-name.outputs.repo_name }}-${{ inputs.pr_number }}"
+        echo "Cleaning up ${DEPLOY_NAME} in namespace ${NAMESPACE}"
+        kubectl delete deployment -n "$NAMESPACE" "$DEPLOY_NAME" --ignore-not-found
+        kubectl delete svc -n "$NAMESPACE" "$DEPLOY_NAME" --ignore-not-found
+        kubectl delete ing -n "$NAMESPACE" "$DEPLOY_NAME" --ignore-not-found
       shell: bash
